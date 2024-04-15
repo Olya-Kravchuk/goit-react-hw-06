@@ -1,32 +1,40 @@
-import React from "react";
+
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import css from "./ContactForm.module.css";
+import { addContact } from "../../redux/contactsSlice";
+import { useDispatch } from "react-redux";
 
 const FeedbackSchema = Yup.object().shape({
   name: Yup.string()
     .min(3, "Your name is too Short!")
     .max(50, "Your name is too Long!")
     .required("Name is required"),
-  phone: Yup.string()
+  number: Yup.string()
     .min(3, "Your number is too Short!")
     .max(50, "Your number is too Long!")
-    .required("Phone is required"),
+    .required("Number is required"),
 });
 
 const FORM_INITIAL_VALUES = {
-  id: Date.now(),
   name: "",
-  phone: "",
+  number: "",
 };
 
-const ContactForm = ({ onAdd }) => {
+const ContactForm = () => {
+  const dispatch = useDispatch();
+
+  const onAddContact = (newContact) => {
+    const finalContact = { ...newContact };
+    dispatch(addContact(finalContact));
+  };
+
   const handleSubmit = (values, actions) => {
-    onAdd({
-      id: Date.now(),
+    dispatch(onAddContact({
       name: values.name,
-      number: values.phone,
-    });
+      number: values.number,
+      id: Date.now()
+    }));
     actions.resetForm();
   };
 
@@ -48,58 +56,19 @@ const ContactForm = ({ onAdd }) => {
           <ErrorMessage component="p" name="name" />
         </div>
         <div className={css.formGroup}>
-          <label htmlFor="phone">Number:</label>
+          <label htmlFor="number">Number:</label>
           <Field
             type="tel"
-            id="phone"
-            name="phone"
+            id="number"
+            name="number"
             placeholder="Enter your phone number"
           />
-          <ErrorMessage component="p" name="phone" />
+          <ErrorMessage component="p" name="number" />
         </div>
         <button type="submit">Add contact</button>
       </Form>
     </Formik>
   );
 };
-
-// const ContactForm = ({ onAdd }) => {
-//   const handleSubmit = (event) => {
-//     event.preventDefault();
-//     const contactName = event.currentTarget.elements.name.value;
-//     const contactPhone = event.currentTarget.elements.phone.value;
-//     onAdd({
-//       id: Date.now(),
-//       name: contactName,
-//       number: contactPhone,
-//     });
-//     event.target.reset();
-//   };
-//   return (
-//       <form className={css.contactForm} onSubmit={handleSubmit}>
-//         <div className={css.formGroup}>
-//           <label htmlFor="name">Name:</label>
-//           <input
-//             type="text"
-//             id="name"
-//             name="name"
-//             placeholder="Enter your name"
-//             required
-//           />
-//         </div>
-//         <div className={css.formGroup}>
-//           <label htmlFor="phone">Number:</label>
-//           <input
-//             type="tel"
-//             id="phone"
-//             name="phone"
-//             placeholder="Enter your phone number"
-//             required
-//           />
-//         </div>
-//         <button type="submit">Add contact</button>
-//       </form>
-//   );
-// };
 
 export default ContactForm;
